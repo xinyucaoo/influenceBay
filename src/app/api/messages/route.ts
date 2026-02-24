@@ -67,6 +67,8 @@ const sendMessageSchema = z.object({
   body: z.string().min(1, "Message body is required"),
   contactRequestId: z.string().optional(),
   applicationId: z.string().optional(),
+  listingId: z.string().optional(),
+  offerId: z.string().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -277,6 +279,8 @@ export async function POST(request: NextRequest) {
         body: data.body,
         contactRequestId: data.contactRequestId ?? null,
         applicationId: data.applicationId ?? null,
+        listingId: data.listingId ?? null,
+        offerId: data.offerId ?? null,
       },
     });
 

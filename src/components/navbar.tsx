@@ -38,6 +38,7 @@ export function Navbar() {
   const navLinks = [
     { href: "/influencers", label: "Influencers" },
     { href: "/campaigns", label: "Campaigns" },
+    { href: "/listings", label: "Listings" },
     { href: "/brands", label: "Brands" },
   ];
 

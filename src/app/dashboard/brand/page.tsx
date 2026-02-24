@@ -22,6 +22,7 @@ import {
   Clock,
   ArrowRight,
   Settings,
+  Tag,
 } from "lucide-react";
 
 type BrandRow = {
@@ -230,6 +231,12 @@ export default async function BrandDashboardPage() {
               <Link href="/dashboard/campaigns/new">
                 <Plus className="h-4 w-4" />
                 Create Campaign
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="justify-start gap-2">
+              <Link href="/listings">
+                <Tag className="h-4 w-4" />
+                Sponsorship Listings
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start gap-2">

@@ -21,6 +21,7 @@ type UserRow = {
 const createContactSchema = z.object({
   toUserId: z.string().min(1, "Recipient user ID is required"),
   message: z.string().min(1, "Message is required"),
+  listingId: z.string().optional(),
 });
 
 export async function GET() {
@@ -143,11 +144,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (data.listingId) {
+      const listing = await prisma.sponsorshipListing.findUnique({
+        where: { id: data.listingId },
+      });
+      if (!listing) {
+        return NextResponse.json(
+          { error: "Listing not found" },
+          { status: 404 }
+        );
+      }
+      const infProfile = await prisma.influencerProfile.findUnique({
+        where: { id: listing.influencerProfileId },
+      });
+      if (infProfile?.userId !== data.toUserId) {
+        return NextResponse.json(
+          { error: "Listing does not belong to this influencer" },
+          { status: 400 }
+        );
+      }
+    }
+
     const contact = await prisma.contactRequest.create({
       data: {
         fromUserId: session.user.id,
         toUserId: data.toUserId,
         message: data.message,
+        listingId: data.listingId ?? null,
       },
     });
 

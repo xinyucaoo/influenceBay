@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Clock,
   ArrowRight,
+  Tag,
 } from "lucide-react";
 
 type InfluencerRow = {
@@ -79,7 +80,7 @@ export default async function InfluencerDashboardPage() {
     );
   }
 
-  const [applicationCount, recentApplications, contactRequestCount] =
+  const [applicationCount, recentApplications, contactRequestCount, listingCount] =
     await Promise.all([
       prisma.application.count({
         where: { influencerProfileId: profile.id },
@@ -92,6 +93,12 @@ export default async function InfluencerDashboardPage() {
       prisma.contactRequest.count({
         where: { toUserId: session.user.id },
       }) as Promise<number>,
+      prisma.influencerProfile
+        .findUnique({
+          where: { id: profile.id },
+          select: { _count: { select: { listings: true } } },
+        })
+        .then((p) => p?._count?.listings ?? 0),
     ]);
 
   const campaignIds = recentApplications.map((a) => a.campaignId);
@@ -122,6 +129,12 @@ export default async function InfluencerDashboardPage() {
       icon: UserCheck,
       color: "text-emerald-600 bg-emerald-50",
     },
+    {
+      label: "My Listings",
+      value: listingCount,
+      icon: Tag,
+      color: "text-amber-600 bg-amber-50",
+    },
   ];
 
   return (
@@ -135,7 +148,7 @@ export default async function InfluencerDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="flex items-center gap-4">
@@ -214,6 +227,12 @@ export default async function InfluencerDashboardPage() {
               <Link href="/dashboard/profile">
                 <Pencil className="h-4 w-4" />
                 Edit Profile
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="justify-start gap-2">
+              <Link href="/dashboard/listings">
+                <Tag className="h-4 w-4" />
+                My Listings
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start gap-2">
