@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DIRECT_DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+enum Role {
+  INFLUENCER
+  BRAND
+}
+
+enum Platform {
+  YOUTUBE
+  INSTAGRAM
+  TIKTOK
+  TWITTER
+}
+
+enum CampaignStatus {
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ContactStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  passwordHash   String?
+  avatarUrl      String?
+  role           Role?
+  emailVerified  DateTime?
+  onboarded      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  accounts          Account[]
+  sessions          Session[]
+  influencerProfile InfluencerProfile?
+  brandProfile      BrandProfile?
+  sentMessages      Message[]        @relation("SentMessages")
+  receivedMessages  Message[]        @relation("ReceivedMessages")
+  sentContacts      ContactRequest[] @relation("SentContacts")
+  receivedContacts  ContactRequest[] @relation("ReceivedContacts")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InfluencerProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  handle           String   @unique
+  bio              String?
+  audienceDemo     Json?
+  pricing          Json?
+  portfolioLinks   String[]
+  isPublic         Boolean  @default(true)
+  profileViews     Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialAccounts  SocialAccount[]
+  niches          Niche[]         @relation("InfluencerNiches")
+  applications    Application[]
+}
+
+model BrandProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  handle      String   @unique
+  companyName String
+  logo        String?
+  website     String?
+  industry    String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns Campaign[]
+}
+
+model SocialAccount {
+  id                  String   @id @default(cuid())
+  influencerProfileId String
+  platform            Platform
+  handle              String
+  followerCount       Int      @default(0)
+  profileUrl          String?
+
+  influencerProfile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+}
+
+model Niche {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  influencers InfluencerProfile[] @relation("InfluencerNiches")
+  campaigns   Campaign[]          @relation("CampaignNiches")
+}
+
+model Campaign {
+  id             String         @id @default(cuid())
+  brandProfileId String
+  title          String
+  description    String
+  requirements   String?
+  budgetMin      Float?
+  budgetMax      Float?
+  deadline       DateTime?
+  status         CampaignStatus @default(OPEN)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  brandProfile BrandProfile  @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  niches       Niche[]       @relation("CampaignNiches")
+  applications Application[]
+}
+
+model Application {
+  id                  String            @id @default(cuid())
+  campaignId          String
+  influencerProfileId String
+  pitch               String
+  status              ApplicationStatus @default(PENDING)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  campaign          Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencerProfile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  messages          Message[]
+
+  @@unique([campaignId, influencerProfileId])
+}
+
+model ContactRequest {
+  id         String        @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  message    String
+  status     ContactStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  fromUser User      @relation("SentContacts", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User      @relation("ReceivedContacts", fields: [toUserId], references: [id], onDelete: Cascade)
+  messages Message[]
+}
+
+model Message {
+  id               String  @id @default(cuid())
+  senderUserId     String
+  receiverUserId   String
+  body             String
+  contactRequestId String?
+  applicationId    String?
+  createdAt        DateTime @default(now())
+
+  sender         User            @relation("SentMessages", fields: [senderUserId], references: [id], onDelete: Cascade)
+  receiver       User            @relation("ReceivedMessages", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  contactRequest ContactRequest? @relation(fields: [contactRequestId], references: [id], onDelete: Cascade)
+  application    Application?    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
