@@ -19,17 +19,20 @@ A marketplace connecting influencers and brands for transparent, efficient spons
 
 ### Setup
 
+**Option A: Local PostgreSQL (recommended – supports Prisma Studio + Next.js simultaneously)**
+
 ```bash
 # Install dependencies
 npm install
 
-# Start local Prisma Postgres (runs in foreground)
-npx prisma dev
+# Create database (Homebrew Postgres)
+createdb influencebay
 
-# In a separate terminal:
+# Or use Docker: npm run db:up
 
 # Run migrations
-npx prisma migrate dev
+npm run db:migrate
+# Or: npx prisma migrate deploy
 
 # Generate Prisma client
 npx prisma generate
@@ -39,6 +42,17 @@ npx tsx prisma/seed.ts
 
 # Start development server
 npm run dev
+```
+
+Set `DIRECT_DATABASE_URL` in `.env`:
+- Homebrew: `postgres://YOUR_USERNAME@localhost:5432/influencebay?sslmode=disable`
+- Docker: `postgres://postgres:postgres@localhost:5432/influencebay?sslmode=disable`
+
+**Option B: Prisma dev (single connection – stop Next.js before opening Prisma Studio)**
+
+```bash
+npx prisma dev --no-browser
+# In another terminal: npx prisma migrate dev && npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).

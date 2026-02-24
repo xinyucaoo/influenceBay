@@ -1,2 +1,18 @@
-[00:00:00.750] Server  LOG     ✓ Ready in 597ms
-[00:00:08.544] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:00.783] Server  LOG     ✓ Ready in 583ms
+[00:00:01.743] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:32.080] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[00:02:32.080] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:02:32.080] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[00:02:32.080] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:03:03.774] Server  LOG     ✓ Compiled in 30ms
+[00:03:04.230] Server  LOG     ✓ Compiled in 126ms
+[00:03:05.876] Server  LOG     ✓ Compiled in 24ms
+[00:03:06.390] Server  LOG     ✓ Compiled in 30ms

@@ -1,11 +1,6 @@
 {
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/brands/route": "app/api/brands/route.js",
-  "/api/campaigns/route": "app/api/campaigns/route.js",
-  "/api/influencers/route": "app/api/influencers/route.js",
   "/api/niches/route": "app/api/niches/route.js",
-  "/brands/page": "app/brands/page.js",
-  "/campaigns/page": "app/campaigns/page.js",
-  "/influencers/page": "app/influencers/page.js",
-  "/page": "app/page.js"
+  "/api/profile/influencer/route": "app/api/profile/influencer/route.js",
+  "/dashboard/profile/page": "app/dashboard/profile/page.js"
 }

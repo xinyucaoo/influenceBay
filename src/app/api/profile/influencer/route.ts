@@ -25,15 +25,27 @@ const profileSchema = z.object({
       other: z.string().optional(),
     })
     .optional(),
-  portfolioLinks: z.array(z.string().url()).optional(),
+  portfolioLinks: z.preprocess(
+    (arr) =>
+      Array.isArray(arr)
+        ? arr.filter((u) => typeof u === "string" && u.trim().length > 0)
+        : arr,
+    z.array(z.string().url()).optional()
+  ),
   nicheIds: z.array(z.string()).optional(),
   socialAccounts: z
     .array(
       z.object({
         platform: z.enum(["YOUTUBE", "INSTAGRAM", "TIKTOK", "TWITTER"]),
         handle: z.string(),
-        followerCount: z.number().int().min(0),
-        profileUrl: z.string().url().optional(),
+        followerCount: z.preprocess(
+          (v) => (typeof v === "number" && Number.isNaN(v) ? 0 : v),
+          z.number().int().min(0)
+        ),
+        profileUrl: z.preprocess(
+          (v) => (v === "" || v == null ? undefined : v),
+          z.string().url().optional()
+        ),
       })
     )
     .optional(),
@@ -117,10 +129,10 @@ export async function POST(request: Request) {
     return NextResponse.json(profile, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.issues[0].message },
-        { status: 400 }
-      );
+      const issue = error.issues[0];
+      const field = issue.path.join(".");
+      const msg = field ? `${field}: ${issue.message}` : issue.message;
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
     console.error(error);
     return NextResponse.json(
@@ -196,10 +208,10 @@ export async function PUT(request: Request) {
     return NextResponse.json(profile);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.issues[0].message },
-        { status: 400 }
-      );
+      const issue = error.issues[0];
+      const field = issue.path.join(".");
+      const msg = field ? `${field}: ${issue.message}` : issue.message;
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
     console.error(error);
     return NextResponse.json(

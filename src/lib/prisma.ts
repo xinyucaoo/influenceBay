@@ -25,11 +25,13 @@ function createPrismaClient() {
     }).$extends(withAccelerate()) as unknown as PrismaClient;
   }
 
+  // prisma dev (port 51214) only supports 1 connection; Docker/standalone Postgres supports more
+  const isPrismaDev = databaseUrl.includes("51214");
   const adapter = new PrismaPg({
     connectionString: databaseUrl,
-    max: 1,
-    idleTimeoutMillis: 1,
-    connectionTimeoutMillis: 0,
+    max: isPrismaDev ? 1 : 10,
+    idleTimeoutMillis: isPrismaDev ? 1 : 10000,
+    connectionTimeoutMillis: 10000,
   });
   return new PrismaClient({ adapter });
 }
