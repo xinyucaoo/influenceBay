@@ -70,7 +70,7 @@ model InfluencerProfile {
   user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   socialAccounts SocialAccount[]
   niches         Niche[]              @relation("InfluencerNiches")
-  listings       SponsorshipListing[]
+  offers         Offer[]
 }
 
 model BrandProfile {
@@ -86,7 +86,6 @@ model BrandProfile {
   updatedAt   DateTime   @updatedAt
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   campaigns   Campaign[]
-  offers      Offer[]
 }
 
 model SocialAccount {
@@ -109,7 +108,7 @@ model Niche {
 }
 
 model Campaign {
-  id             String         @id @default(cuid())
+  id             String               @id @default(cuid())
   brandProfileId String
   title          String
   description    String
@@ -117,12 +116,13 @@ model Campaign {
   budgetMin      Float?
   budgetMax      Float?
   deadline       DateTime?
-  status         CampaignStatus @default(OPEN)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  status         CampaignStatus       @default(OPEN)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
   applications   Application[]
-  brandProfile   BrandProfile   @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
-  niches         Niche[]        @relation("CampaignNiches")
+  listings       SponsorshipListing[]
+  brandProfile   BrandProfile         @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  niches         Niche[]              @relation("CampaignNiches")
 }
 
 model Application {
@@ -174,36 +174,36 @@ model Message {
 }
 
 model SponsorshipListing {
-  id               String             @id @default(cuid())
-  influencerProfileId String
-  title            String
-  description      String
-  pricingType      ListingPricingType
-  fixedPrice       Float?
-  startingBid      Float?
-  reservePrice     Float?
-  auctionEndsAt    DateTime?
-  status           ListingStatus      @default(OPEN)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  influencerProfile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
-  niches           Niche[]            @relation("ListingNiches")
-  offers           Offer[]
-  messages         Message[]
-  contactRequests  ContactRequest[]
+  id          String               @id @default(cuid())
+  campaignId  String
+  title       String
+  description String
+  pricingType ListingPricingType
+  fixedPrice  Float?
+  startingBid Float?
+  reservePrice Float?
+  auctionEndsAt DateTime?
+  status      ListingStatus        @default(OPEN)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  campaign    Campaign             @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  niches      Niche[]              @relation("ListingNiches")
+  offers      Offer[]
+  messages    Message[]
+  contactRequests ContactRequest[]
 }
 
 model Offer {
-  id             String             @id @default(cuid())
-  listingId      String
-  brandProfileId String
-  amount         Float
-  message        String?
-  status         OfferStatus        @default(PENDING)
-  createdAt      DateTime           @default(now())
-  listing        SponsorshipListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  brandProfile   BrandProfile       @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
-  messages       Message[]
+  id                  String             @id @default(cuid())
+  listingId           String
+  influencerProfileId String
+  amount              Float
+  message             String?
+  status              OfferStatus        @default(PENDING)
+  createdAt           DateTime           @default(now())
+  listing             SponsorshipListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  influencerProfile  InfluencerProfile  @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  messages            Message[]
 }
 
 enum Role {

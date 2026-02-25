@@ -5,7 +5,7 @@ import { z } from "zod";
 
 type ListingRow = {
   id: string;
-  influencerProfileId: string;
+  campaignId: string;
   title: string;
   description: string;
   pricingType: string;
@@ -17,12 +17,18 @@ type ListingRow = {
   createdAt: Date;
 };
 
-type InfluencerProfileRow = {
+type BrandProfileRow = {
   id: string;
   handle: string;
-  bio: string | null;
+  companyName: string;
+  logo: string | null;
   user: { name: string | null; avatarUrl: string | null };
-  socialAccounts: { platform: string; followerCount: number }[];
+};
+
+type CampaignRow = {
+  id: string;
+  title: string;
+  brandProfile: BrandProfileRow;
 };
 
 type NicheRow = {
@@ -33,6 +39,7 @@ type NicheRow = {
 
 const createListingSchema = z
   .object({
+    campaignId: z.string().min(1, "Campaign is required"),
     title: z.string().min(5, "Title must be at least 5 characters"),
     description: z.string().min(20, "Description must be at least 20 characters"),
     pricingType: z.enum(["FIXED", "AUCTION"]),
@@ -83,8 +90,8 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
 
-    if (mine && session?.user?.role === "INFLUENCER") {
-      const profile = await prisma.influencerProfile.findUnique({
+    if (mine && session?.user?.role === "BRAND") {
+      const profile = await prisma.brandProfile.findUnique({
         where: { userId: session.user.id },
       });
       if (!profile) {
@@ -95,7 +102,7 @@ export async function GET(request: NextRequest) {
           totalPages: 0,
         });
       }
-      where.influencerProfileId = profile.id;
+      where.campaign = { brandProfileId: profile.id };
     } else {
       where.status = "OPEN";
     }
@@ -175,14 +182,18 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         niches: true,
-        influencerProfile: {
+        campaign: {
           select: {
             id: true,
-            handle: true,
-            bio: true,
-            user: { select: { name: true, avatarUrl: true } },
-            socialAccounts: {
-              select: { platform: true, followerCount: true },
+            title: true,
+            brandProfile: {
+              select: {
+                id: true,
+                handle: true,
+                companyName: true,
+                logo: true,
+                user: { select: { name: true, avatarUrl: true } },
+              },
             },
           },
         },
@@ -194,7 +205,7 @@ export async function GET(request: NextRequest) {
         l.id,
         {
           niches: l.niches as NicheRow[],
-          influencerProfile: l.influencerProfile as InfluencerProfileRow,
+          campaign: l.campaign as CampaignRow,
         },
       ])
     );
@@ -204,7 +215,7 @@ export async function GET(request: NextRequest) {
       return {
         ...listing,
         niches: rel?.niches ?? [],
-        influencerProfile: rel?.influencerProfile ?? null,
+        campaign: rel?.campaign ?? null,
       };
     });
 
@@ -230,20 +241,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "INFLUENCER") {
+    if (session.user.role !== "BRAND") {
       return NextResponse.json(
-        { error: "Only influencers can create sponsorship listings" },
+        { error: "Only brands can create sponsorship listings" },
         { status: 403 }
       );
     }
 
-    const profile = await prisma.influencerProfile.findUnique({
+    const profile = await prisma.brandProfile.findUnique({
       where: { userId: session.user.id },
     });
 
     if (!profile) {
       return NextResponse.json(
-        { error: "Influencer profile not found. Complete onboarding first." },
+        { error: "Brand profile not found. Complete onboarding first." },
         { status: 400 }
       );
     }
@@ -251,9 +262,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createListingSchema.parse(body);
 
+    const campaign = await prisma.campaign.findFirst({
+      where: {
+        id: data.campaignId,
+        brandProfileId: profile.id,
+      },
+    });
+
+    if (!campaign) {
+      return NextResponse.json(
+        { error: "Campaign not found or you do not own it" },
+        { status: 400 }
+      );
+    }
+
     const listing = await prisma.sponsorshipListing.create({
       data: {
-        influencerProfileId: profile.id,
+        campaignId: data.campaignId,
         title: data.title,
         description: data.description,
         pricingType: data.pricingType as "FIXED" | "AUCTION",

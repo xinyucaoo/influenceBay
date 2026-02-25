@@ -2,10 +2,24 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const TCP_URL =
-  "postgres://postgres:postgres@localhost:51214/template1?sslmode=disable";
+const databaseUrl =
+  process.env.DIRECT_DATABASE_URL || process.env.DATABASE_URL;
 
-const adapter = new PrismaPg({ connectionString: TCP_URL });
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL or DIRECT_DATABASE_URL must be set");
+}
+
+// Seed requires direct Postgres URL (not Prisma Accelerate)
+if (
+  databaseUrl.startsWith("prisma+postgres://") ||
+  databaseUrl.startsWith("prisma://")
+) {
+  throw new Error(
+    "Seeding requires DIRECT_DATABASE_URL with a direct Postgres connection"
+  );
+}
+
+const adapter = new PrismaPg({ connectionString: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
 const niches = [

@@ -5,14 +5,14 @@ import { z } from "zod";
 
 type ListingRow = {
   id: string;
-  influencerProfileId: string;
+  campaignId: string;
   status: string;
 };
 
 type OfferRow = {
   id: string;
   listingId: string;
-  brandProfileId: string;
+  influencerProfileId: string;
   status: string;
 };
 
@@ -43,13 +43,14 @@ export async function PUT(
       );
     }
 
-    const influencerProfile = await prisma.influencerProfile.findUnique({
-      where: { userId: session.user.id },
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: listing.campaignId },
+      include: { brandProfile: true },
     });
 
-    if (!influencerProfile || influencerProfile.id !== listing.influencerProfileId) {
+    if (!campaign || campaign.brandProfile.userId !== session.user.id) {
       return NextResponse.json(
-        { error: "Only the listing owner can accept or reject offers" },
+        { error: "Only the campaign owner can accept or reject offers" },
         { status: 403 }
       );
     }

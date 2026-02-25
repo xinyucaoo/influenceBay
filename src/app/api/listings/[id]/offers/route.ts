@@ -5,7 +5,7 @@ import { z } from "zod";
 
 type ListingRow = {
   id: string;
-  influencerProfileId: string;
+  campaignId: string;
   pricingType: string;
   fixedPrice: number | null;
   startingBid: number | null;
@@ -16,18 +16,16 @@ type ListingRow = {
 type OfferRow = {
   id: string;
   listingId: string;
-  brandProfileId: string;
+  influencerProfileId: string;
   amount: number;
   message: string | null;
   status: string;
   createdAt: Date;
 };
 
-type BrandProfileRow = {
+type InfluencerProfileRow = {
   id: string;
   handle: string;
-  companyName: string;
-  logo: string | null;
   user: { name: string | null; avatarUrl: string | null };
 };
 
@@ -66,14 +64,18 @@ export async function GET(
       where: { userId: session.user.id },
     });
 
-    const isOwner = influencerProfile?.id === listing.influencerProfileId;
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: listing.campaignId },
+      select: { brandProfileId: true },
+    });
+    const isBrandOwner = brandProfile?.id === campaign?.brandProfileId;
 
-    // Influencer sees all offers; brand sees only their own
-    const offerWhere = isOwner
+    // Brand sees all offers on their listing; influencer sees only their own
+    const offerWhere = isBrandOwner
       ? { listingId: id }
-      : { listingId: id, brandProfileId: brandProfile?.id ?? "" };
+      : { listingId: id, influencerProfileId: influencerProfile?.id ?? "" };
 
-    if (!isOwner && !brandProfile) {
+    if (!isBrandOwner && !influencerProfile) {
       return NextResponse.json({ offers: [] });
     }
 
@@ -86,23 +88,21 @@ export async function GET(
       return NextResponse.json({ offers: [] });
     }
 
-    const brandProfileIds = [...new Set(offers.map((o) => o.brandProfileId))];
-    const brandProfiles = (await prisma.brandProfile.findMany({
-      where: { id: { in: brandProfileIds } },
+    const influencerProfileIds = [...new Set(offers.map((o) => o.influencerProfileId))];
+    const influencerProfiles = (await prisma.influencerProfile.findMany({
+      where: { id: { in: influencerProfileIds } },
       select: {
         id: true,
         handle: true,
-        companyName: true,
-        logo: true,
         user: { select: { name: true, avatarUrl: true } },
       },
-    })) as BrandProfileRow[];
+    })) as InfluencerProfileRow[];
 
-    const brandMap = new Map(brandProfiles.map((b) => [b.id, b]));
+    const influencerMap = new Map(influencerProfiles.map((p) => [p.id, p]));
 
     const enriched = offers.map((offer) => ({
       ...offer,
-      brandProfile: brandMap.get(offer.brandProfileId) ?? null,
+      influencerProfile: influencerMap.get(offer.influencerProfileId) ?? null,
     }));
 
     return NextResponse.json({ offers: enriched });
@@ -125,22 +125,22 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "BRAND") {
+    if (session.user.role !== "INFLUENCER") {
       return NextResponse.json(
-        { error: "Only brands can make offers" },
+        { error: "Only influencers can make offers" },
         { status: 403 }
       );
     }
 
     const { id } = await params;
 
-    const brandProfile = await prisma.brandProfile.findUnique({
+    const influencerProfile = await prisma.influencerProfile.findUnique({
       where: { userId: session.user.id },
     });
 
-    if (!brandProfile) {
+    if (!influencerProfile) {
       return NextResponse.json(
-        { error: "Brand profile not found. Complete onboarding first." },
+        { error: "Influencer profile not found. Complete onboarding first." },
         { status: 400 }
       );
     }
@@ -166,11 +166,11 @@ export async function POST(
     const body = await request.json();
     const data = createOfferSchema.parse(body);
 
-    // One pending offer per brand per listing
+    // One pending offer per influencer per listing
     const existingPending = await prisma.offer.findFirst({
       where: {
         listingId: id,
-        brandProfileId: brandProfile.id,
+        influencerProfileId: influencerProfile.id,
         status: "PENDING",
       },
     });
@@ -223,7 +223,7 @@ export async function POST(
     const offer = await prisma.offer.create({
       data: {
         listingId: id,
-        brandProfileId: brandProfile.id,
+        influencerProfileId: influencerProfile.id,
         amount: data.amount,
         message: data.message ?? null,
       },

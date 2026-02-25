@@ -90,9 +90,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "BRAND") {
+    if (session.user.role !== "BRAND" && session.user.role !== "INFLUENCER") {
       return NextResponse.json(
-        { error: "Only brands can send contact requests" },
+        { error: "Only brands and influencers can send contact requests" },
         { status: 403 }
       );
     }
@@ -119,9 +119,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (toUser.role !== "INFLUENCER") {
+    if (toUser.role !== "INFLUENCER" && toUser.role !== "BRAND") {
       return NextResponse.json(
-        { error: "Contact requests can only be sent to influencers" },
+        { error: "Contact requests can only be sent to influencers or brands" },
         { status: 400 }
       );
     }
@@ -147,6 +147,7 @@ export async function POST(request: NextRequest) {
     if (data.listingId) {
       const listing = await prisma.sponsorshipListing.findUnique({
         where: { id: data.listingId },
+        include: { campaign: { include: { brandProfile: true } } },
       });
       if (!listing) {
         return NextResponse.json(
@@ -154,12 +155,10 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         );
       }
-      const infProfile = await prisma.influencerProfile.findUnique({
-        where: { id: listing.influencerProfileId },
-      });
-      if (infProfile?.userId !== data.toUserId) {
+      const brandUserId = listing.campaign.brandProfile.userId;
+      if (session.user.role === "INFLUENCER" && data.toUserId !== brandUserId) {
         return NextResponse.json(
-          { error: "Listing does not belong to this influencer" },
+          { error: "When contacting about a listing, recipient must be the campaign owner" },
           { status: 400 }
         );
       }

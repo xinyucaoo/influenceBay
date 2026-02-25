@@ -5,7 +5,7 @@ import { z } from "zod";
 
 type ListingRow = {
   id: string;
-  influencerProfileId: string;
+  campaignId: string;
   title: string;
   description: string;
   pricingType: string;
@@ -17,12 +17,12 @@ type ListingRow = {
   createdAt: Date;
 };
 
-type InfluencerProfileRow = {
+type BrandProfileRow = {
   id: string;
   handle: string;
-  bio: string | null;
-  user: { name: string | null; avatarUrl: string | null };
-  socialAccounts: { platform: string; handle: string; followerCount: number }[];
+  companyName: string;
+  logo: string | null;
+  user: { id: string; name: string | null; avatarUrl: string | null };
 };
 
 type NicheRow = {
@@ -55,20 +55,24 @@ export async function GET(
       );
     }
 
-    const [influencerProfile, niches, offerCount, highestBid] =
+    const [campaign, niches, offerCount, highestBid] =
       await Promise.all([
-        prisma.influencerProfile.findUnique({
-          where: { id: listing.influencerProfileId },
+        prisma.campaign.findUnique({
+          where: { id: listing.campaignId },
           select: {
             id: true,
-            handle: true,
-            bio: true,
-            user: { select: { name: true, avatarUrl: true } },
-            socialAccounts: {
-              select: { platform: true, handle: true, followerCount: true },
+            title: true,
+            brandProfile: {
+              select: {
+                id: true,
+                handle: true,
+                companyName: true,
+                logo: true,
+                user: { select: { id: true, name: true, avatarUrl: true } },
+              },
             },
           },
-        }) as Promise<InfluencerProfileRow | null>,
+        }),
         prisma.niche.findMany({
           where: { listings: { some: { id } } },
         }) as Promise<NicheRow[]>,
@@ -88,7 +92,7 @@ export async function GET(
 
     return NextResponse.json({
       ...listing,
-      influencerProfile: influencerProfile ?? null,
+      campaign: campaign ?? null,
       niches,
       offerCount,
       highestBid,
@@ -125,13 +129,17 @@ export async function PUT(
       );
     }
 
-    const profile = await prisma.influencerProfile.findUnique({
+    const brandProfile = await prisma.brandProfile.findUnique({
       where: { userId: session.user.id },
     });
 
-    if (!profile || profile.id !== listing.influencerProfileId) {
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: listing.campaignId, brandProfileId: brandProfile?.id ?? "" },
+    });
+
+    if (!brandProfile || !campaign) {
       return NextResponse.json(
-        { error: "You can only edit your own listings" },
+        { error: "You can only edit listings in your campaigns" },
         { status: 403 }
       );
     }
@@ -183,13 +191,17 @@ export async function DELETE(
       );
     }
 
-    const profile = await prisma.influencerProfile.findUnique({
+    const brandProfile = await prisma.brandProfile.findUnique({
       where: { userId: session.user.id },
     });
 
-    if (!profile || profile.id !== listing.influencerProfileId) {
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: listing.campaignId, brandProfileId: brandProfile?.id ?? "" },
+    });
+
+    if (!brandProfile || !campaign) {
       return NextResponse.json(
-        { error: "You can only delete your own listings" },
+        { error: "You can only delete listings in your campaigns" },
         { status: 403 }
       );
     }

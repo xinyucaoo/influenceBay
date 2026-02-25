@@ -137,39 +137,38 @@ function BrandsPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/40 to-background">
-      {/* Hero header */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/5 via-background to-primary/10 pb-12 pt-20">
-        <div className="mx-auto max-w-5xl px-4 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-            <Building2 className="h-7 w-7 text-primary" />
-          </div>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Discover <span className="text-primary">Brands</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Browse companies looking for influencer partnerships. Find the
-            perfect brand to collaborate with and grow together.
-          </p>
-
-          {/* Search & filters */}
-          <div className="mx-auto mt-8 flex max-w-2xl flex-col gap-3 sm:flex-row">
-            <form onSubmit={handleSearch} className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search brands by name..."
-                className="h-11 pl-10 pr-4"
-              />
-            </form>
-            <Select
-              value={currentIndustry || "all"}
-              onValueChange={handleIndustryChange}
-            >
-              <SelectTrigger className="h-11 w-full sm:w-48">
-                <SelectValue placeholder="All Industries" />
-              </SelectTrigger>
+    <div className="min-h-screen">
+      {/* Header */}
+      <section className="border-b bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Brands
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {data
+                  ? `${data.total.toLocaleString()} brands`
+                  : "Browse companies looking for partnerships"}
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-2 sm:max-w-md sm:flex-row">
+              <form onSubmit={handleSearch} className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search brands..."
+                  className="h-10 pl-9"
+                />
+              </form>
+              <Select
+                value={currentIndustry || "all"}
+                onValueChange={handleIndustryChange}
+              >
+                <SelectTrigger className="h-10 w-full sm:w-40">
+                  <SelectValue placeholder="All Industries" />
+                </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Industries</SelectItem>
                 {INDUSTRIES.map((ind) => (
@@ -178,7 +177,8 @@ function BrandsPageInner() {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+              </Select>
+            </div>
           </div>
         </div>
       </section>

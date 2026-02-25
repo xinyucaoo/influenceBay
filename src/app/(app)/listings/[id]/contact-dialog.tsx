@@ -21,13 +21,13 @@ import {
 interface ContactDialogProps {
   listingId: string;
   listingTitle: string;
-  influencerUserId: string;
+  brandUserId: string;
 }
 
 export function ContactDialog({
   listingId,
   listingTitle,
-  influencerUserId,
+  brandUserId,
 }: ContactDialogProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -35,7 +35,7 @@ export function ContactDialog({
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const isBrand = session?.user?.role === "BRAND";
+  const isInfluencer = session?.user?.role === "INFLUENCER";
 
   if (!session?.user) {
     return (
@@ -48,7 +48,7 @@ export function ContactDialog({
     );
   }
 
-  if (!isBrand) {
+  if (!isInfluencer) {
     return null;
   }
 
@@ -64,7 +64,7 @@ export function ContactDialog({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          toUserId: influencerUserId,
+          toUserId: brandUserId,
           message: message.trim(),
           listingId,
         }),
@@ -75,7 +75,7 @@ export function ContactDialog({
         throw new Error(data.error ?? "Failed to send message");
       }
 
-      toast.success("Inquiry sent! The creator will respond when they can.");
+      toast.success("Inquiry sent! The brand will respond when they can.");
       setOpen(false);
       setMessage("");
       router.push("/dashboard/messages");
@@ -93,14 +93,14 @@ export function ContactDialog({
       <DialogTrigger asChild>
         <Button variant="outline" size="lg" className="gap-2">
           <MessageSquare className="h-4 w-4" />
-          Message About This Listing
+          Message Brand About Listing
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Message Creator</DialogTitle>
+          <DialogTitle>Message Brand</DialogTitle>
           <DialogDescription>
-            Send an inquiry about &ldquo;{listingTitle}&rdquo;. The creator will
+            Send an inquiry about &ldquo;{listingTitle}&rdquo;. The brand will
             receive your message and can respond through the messages page.
           </DialogDescription>
         </DialogHeader>

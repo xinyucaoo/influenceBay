@@ -80,7 +80,7 @@ export default async function InfluencerDashboardPage() {
     );
   }
 
-  const [applicationCount, recentApplications, contactRequestCount, listingCount] =
+  const [applicationCount, recentApplications, contactRequestCount, offerCount] =
     await Promise.all([
       prisma.application.count({
         where: { influencerProfileId: profile.id },
@@ -93,12 +93,9 @@ export default async function InfluencerDashboardPage() {
       prisma.contactRequest.count({
         where: { toUserId: session.user.id },
       }) as Promise<number>,
-      prisma.influencerProfile
-        .findUnique({
-          where: { id: profile.id },
-          select: { _count: { select: { listings: true } } },
-        })
-        .then((p) => p?._count?.listings ?? 0),
+      prisma.offer.count({
+        where: { influencerProfileId: profile.id },
+      }),
     ]);
 
   const campaignIds = recentApplications.map((a) => a.campaignId);
@@ -111,30 +108,10 @@ export default async function InfluencerDashboardPage() {
   const campaignMap = new Map(campaigns.map((c) => [c.id, c]));
 
   const stats = [
-    {
-      label: "Profile Views",
-      value: profile.profileViews,
-      icon: Eye,
-      color: "text-blue-600 bg-blue-50",
-    },
-    {
-      label: "Applications Sent",
-      value: applicationCount,
-      icon: Send,
-      color: "text-violet-600 bg-violet-50",
-    },
-    {
-      label: "Contact Requests",
-      value: contactRequestCount,
-      icon: UserCheck,
-      color: "text-emerald-600 bg-emerald-50",
-    },
-    {
-      label: "My Listings",
-      value: listingCount,
-      icon: Tag,
-      color: "text-amber-600 bg-amber-50",
-    },
+    { label: "Profile Views", value: profile.profileViews, icon: Eye },
+    { label: "Applications Sent", value: applicationCount, icon: Send },
+    { label: "Contact Requests", value: contactRequestCount, icon: UserCheck },
+    { label: "My Offers", value: offerCount, icon: Tag },
   ];
 
   return (
@@ -148,19 +125,20 @@ export default async function InfluencerDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="flex items-center gap-4">
-              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${stat.color}`}>
-                <stat.icon className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-2xl font-bold">{stat.value}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div
+            key={stat.label}
+            className="flex min-w-0 items-center gap-3 rounded-lg border bg-card px-3 py-2.5 shadow-sm"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted [&_svg]:block">
+              <stat.icon className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="flex min-w-0 flex-1 items-baseline gap-2">
+              <span className="text-sm text-muted-foreground">{stat.label}</span>
+              <span className="text-base font-semibold tabular-nums">{stat.value}</span>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -232,7 +210,7 @@ export default async function InfluencerDashboardPage() {
             <Button asChild variant="outline" className="justify-start gap-2">
               <Link href="/dashboard/listings">
                 <Tag className="h-4 w-4" />
-                My Listings
+                My Offers
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start gap-2">

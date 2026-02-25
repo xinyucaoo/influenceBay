@@ -95,7 +95,7 @@ export default function ManageCampaignPage() {
 
       if (appsRes.ok) {
         const data = await appsRes.json();
-        setApplications(data);
+        setApplications(data?.applications ?? []);
       }
     } catch {
       toast.error("Failed to load campaign data");

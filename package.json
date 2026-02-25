@@ -11,7 +11,8 @@
     "studio": "prisma studio",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:migrate": "prisma migrate deploy"
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

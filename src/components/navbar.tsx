@@ -49,17 +49,19 @@ export function Navbar() {
           <Link href="/" className="font-display text-xl tracking-wide">
             Influen
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          {!session?.user && (
+            <nav className="hidden md:flex items-center gap-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -128,18 +130,70 @@ export function Navbar() {
                 Site navigation links
               </SheetDescription>
               <nav className="flex flex-col gap-4 mt-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-lg font-medium"
-                    onClick={() => setOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                {!session?.user && (
+                {session?.user ? (
                   <>
+                    <Link
+                      href="/dashboard"
+                      className="text-lg font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/dashboard/profile"
+                      className="text-lg font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="/dashboard/messages"
+                      className="text-lg font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      Messages
+                    </Link>
+                    <Link
+                      href="/influencers"
+                      className="text-lg font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      Influencers
+                    </Link>
+                    <Link
+                      href="/campaigns"
+                      className="text-lg font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      Campaigns
+                    </Link>
+                    <Link
+                      href="/listings"
+                      className="text-lg font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      Listings
+                    </Link>
+                    <Link
+                      href="/brands"
+                      className="text-lg font-medium"
+                      onClick={() => setOpen(false)}
+                    >
+                      Brands
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="text-lg font-medium"
+                        onClick={() => setOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
                     <Link
                       href="/auth/signin"
                       className="text-lg font-medium"

@@ -47,11 +47,10 @@ interface Offer {
   message: string | null;
   status: string;
   createdAt: string;
-  brandProfile: {
-    companyName: string;
+  influencerProfile: {
     handle: string;
     user: { name: string | null };
-  };
+  } | null;
 }
 
 const OFFER_STATUS_CONFIG: Record<
@@ -82,7 +81,7 @@ export default function ListingDetailPage() {
       router.push("/auth/signin");
     } else if (
       authStatus === "authenticated" &&
-      session?.user?.role !== "INFLUENCER"
+      session?.user?.role !== "BRAND"
     ) {
       router.push("/dashboard");
     }
@@ -114,7 +113,7 @@ export default function ListingDetailPage() {
   }, [listingId]);
 
   useEffect(() => {
-    if (authStatus === "authenticated" && session?.user?.role === "INFLUENCER") {
+    if (authStatus === "authenticated" && session?.user?.role === "BRAND") {
       fetchData();
     }
   }, [authStatus, session, fetchData]);
@@ -365,11 +364,11 @@ export default function ListingDetailPage() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
                               <h4 className="font-semibold">
-                                {offer.brandProfile.user.name ??
-                                  offer.brandProfile.companyName}
+                                {offer.influencerProfile?.user?.name ??
+                                  `@${offer.influencerProfile?.handle}`}
                               </h4>
                               <span className="text-sm text-muted-foreground">
-                                {offer.brandProfile.companyName}
+                                @{offer.influencerProfile?.handle}
                               </span>
                             </div>
                             <p className="mt-1 text-lg font-bold text-emerald-600">

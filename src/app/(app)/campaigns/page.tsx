@@ -150,47 +150,38 @@ function CampaignsPageContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero header */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 py-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent" />
-        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mx-auto flex items-center justify-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white/90 backdrop-blur-sm w-fit mb-6">
-            <Megaphone className="h-4 w-4" />
-            <span>
-              {total > 0
-                ? `${total.toLocaleString()} campaigns`
-                : "Discover campaigns"}
-            </span>
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Find Your Next
-            <span className="block bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">
-              Campaign Opportunity
-            </span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-emerald-100">
-            Browse open campaigns from top brands. Apply with your pitch and
-            start collaborating on exciting projects.
-          </p>
-
-          {/* Search bar */}
-          <div className="relative mx-auto mt-8 max-w-2xl">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search campaigns by title or keyword..."
-              value={searchInput}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="h-14 rounded-full border-0 bg-white pl-12 pr-4 text-base shadow-xl ring-1 ring-white/20 placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-amber-300"
-            />
+      {/* Header */}
+      <section className="border-b bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Campaigns
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {total > 0
+                  ? `${total.toLocaleString()} open campaigns`
+                  : "Browse opportunities from brands"}
+              </p>
+            </div>
+            <div className="relative w-full sm:max-w-sm">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search campaigns..."
+                value={searchInput}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="h-10 pl-9"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Filter row */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Filter className="h-4 w-4" />
+      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <Filter className="h-3.5 w-3.5" />
             Filters
           </div>
 
@@ -200,7 +191,7 @@ function CampaignsPageContent() {
               updateParams({ niche: val === "all" ? "" : val })
             }
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="h-9 w-[160px]">
               <SelectValue placeholder="All Niches" />
             </SelectTrigger>
             <SelectContent>
@@ -218,7 +209,7 @@ function CampaignsPageContent() {
             placeholder="Min budget"
             value={minBudget}
             onChange={(e) => updateParams({ minBudget: e.target.value })}
-            className="w-[140px]"
+            className="h-9 w-[100px]"
           />
 
           <Input
@@ -226,7 +217,7 @@ function CampaignsPageContent() {
             placeholder="Max budget"
             value={maxBudget}
             onChange={(e) => updateParams({ maxBudget: e.target.value })}
-            className="w-[140px]"
+            className="h-9 w-[100px]"
           />
 
           {(q || niche || minBudget || maxBudget) && (

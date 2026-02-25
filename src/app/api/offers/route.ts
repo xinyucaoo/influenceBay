@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 type OfferRow = {
   id: string;
   listingId: string;
-  brandProfileId: string;
+  influencerProfileId: string;
   amount: number;
   message: string | null;
   status: string;
@@ -32,12 +32,12 @@ export async function GET(_request: NextRequest) {
 
     const offerWhere =
       session.user.role === "INFLUENCER" && influencerProfile
-        ? { listing: { influencerProfileId: influencerProfile.id } }
+        ? { influencerProfileId: influencerProfile.id }
         : brandProfile
-          ? { brandProfileId: brandProfile.id }
+          ? { listing: { campaign: { brandProfileId: brandProfile.id } } }
           : { id: "impossible" };
 
-    const offers = (await prisma.offer.findMany({
+    const offers = await prisma.offer.findMany({
       where: offerWhere,
       orderBy: { createdAt: "desc" },
       include: {
@@ -49,40 +49,29 @@ export async function GET(_request: NextRequest) {
             pricingType: true,
             fixedPrice: true,
             startingBid: true,
-            influencerProfile: {
+            campaign: {
               select: {
-                handle: true,
-                user: { select: { name: true } },
+                brandProfile: {
+                  select: {
+                    id: true,
+                    companyName: true,
+                    handle: true,
+                    user: { select: { name: true } },
+                  },
+                },
               },
             },
           },
         },
-        brandProfile: {
+        influencerProfile: {
           select: {
             id: true,
-            companyName: true,
             handle: true,
             user: { select: { name: true } },
           },
         },
       },
-    })) as (OfferRow & {
-      listing: {
-        id: string;
-        title: string;
-        status: string;
-        pricingType: string;
-        fixedPrice: number | null;
-        startingBid: number | null;
-        influencerProfile: { handle: string; user: { name: string | null } };
-      };
-      brandProfile: {
-        id: string;
-        companyName: string;
-        handle: string;
-        user: { name: string | null };
-      };
-    })[];
+    });
 
     return NextResponse.json({ offers });
   } catch (error) {

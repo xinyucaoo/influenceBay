@@ -110,24 +110,9 @@ export default async function BrandDashboardPage() {
   );
 
   const stats = [
-    {
-      label: "Active Campaigns",
-      value: activeCampaigns.length,
-      icon: Megaphone,
-      color: "text-blue-600 bg-blue-50",
-    },
-    {
-      label: "Total Applications",
-      value: totalApplications,
-      icon: FileText,
-      color: "text-violet-600 bg-violet-50",
-    },
-    {
-      label: "Contact Requests Sent",
-      value: contactRequestsSent,
-      icon: Mail,
-      color: "text-emerald-600 bg-emerald-50",
-    },
+    { label: "Active Campaigns", value: activeCampaigns.length, icon: Megaphone },
+    { label: "Total Applications", value: totalApplications, icon: FileText },
+    { label: "Contact Requests Sent", value: contactRequestsSent, icon: Mail },
   ];
 
   const recentCampaigns = allCampaigns.slice(0, 5);
@@ -151,19 +136,20 @@ export default async function BrandDashboardPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="flex items-center gap-4">
-              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${stat.color}`}>
-                <stat.icon className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-2xl font-bold">{stat.value}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div
+            key={stat.label}
+            className="flex min-w-0 items-center gap-3 rounded-lg border bg-card px-3 py-2.5 shadow-sm"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted [&_svg]:block">
+              <stat.icon className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="flex min-w-0 flex-1 items-baseline gap-2">
+              <span className="text-sm text-muted-foreground">{stat.label}</span>
+              <span className="text-base font-semibold tabular-nums">{stat.value}</span>
+            </div>
+          </div>
         ))}
       </div>
 

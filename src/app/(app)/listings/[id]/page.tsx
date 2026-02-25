@@ -6,7 +6,7 @@ import {
   DollarSign,
   Tag,
   Gavel,
-  Users,
+  Building2,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
@@ -41,12 +41,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function formatFollowers(count: number): string {
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
-  return count.toString();
-}
-
 export default async function Page({ params }: Props) {
   const { id } = await params;
 
@@ -55,12 +49,13 @@ export default async function Page({ params }: Props) {
   });
   if (!listing) notFound();
 
-  const [influencerProfile, niches, highestBid] = await Promise.all([
-    prisma.influencerProfile.findUnique({
-      where: { id: listing.influencerProfileId },
+  const [campaign, niches, highestBid] = await Promise.all([
+    prisma.campaign.findUnique({
+      where: { id: listing.campaignId },
       include: {
-        user: { select: { id: true, name: true, avatarUrl: true } },
-        socialAccounts: true,
+        brandProfile: {
+          include: { user: { select: { id: true, name: true, avatarUrl: true } } },
+        },
       },
     }),
     prisma.niche.findMany({
@@ -79,20 +74,17 @@ export default async function Page({ params }: Props) {
       : Promise.resolve(null),
   ]);
 
-  if (!influencerProfile) notFound();
+  if (!campaign) notFound();
 
-  const totalFollowers = influencerProfile.socialAccounts.reduce(
-    (sum, a) => sum + a.followerCount,
-    0,
-  );
-  const initials = influencerProfile.user?.name
-    ? influencerProfile.user.name
+  const brand = campaign.brandProfile;
+  const initials = brand.user?.name
+    ? brand.user.name
         .split(" ")
         .map((w) => w[0])
         .join("")
         .toUpperCase()
         .slice(0, 2)
-    : "?";
+    : brand.companyName.slice(0, 2).toUpperCase();
 
   const priceDisplay =
     listing.pricingType === "FIXED"
@@ -117,24 +109,23 @@ export default async function Page({ params }: Props) {
           </h1>
 
           <Link
-            href={`/influencer/${influencerProfile.handle}`}
+            href={`/brand/${brand.handle}`}
             className="mt-4 inline-flex items-center gap-3 rounded-full bg-muted/60 px-4 py-2 transition-colors hover:bg-muted"
           >
             <Avatar className="h-8 w-8 border">
               <AvatarImage
-                src={influencerProfile.user?.avatarUrl ?? undefined}
-                alt={influencerProfile.user?.name ?? undefined}
+                src={brand.user?.avatarUrl ?? undefined}
+                alt={brand.user?.name ?? undefined}
               />
               <AvatarFallback className="text-xs font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">
-              {influencerProfile.user?.name ?? `@${influencerProfile.handle}`}
+              {brand.companyName}
             </span>
             <span className="text-xs text-muted-foreground">
-              @{influencerProfile.handle} · {formatFollowers(totalFollowers)}{" "}
-              followers
+              @{brand.handle}
             </span>
           </Link>
 
@@ -211,7 +202,7 @@ export default async function Page({ params }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Users className="h-5 w-5 text-primary" />
+              <Building2 className="h-5 w-5 text-primary" />
               About This Opportunity
             </CardTitle>
           </CardHeader>
@@ -222,32 +213,6 @@ export default async function Page({ params }: Props) {
           </CardContent>
         </Card>
 
-        <div className="flex flex-wrap gap-4">
-          {/* Creator reach */}
-          {influencerProfile.socialAccounts.length > 0 && (
-            <Card className="flex-1 min-w-[200px]">
-              <CardHeader>
-                <CardTitle className="text-base">Platforms & Reach</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {influencerProfile.socialAccounts.map((acc) => (
-                  <div
-                    key={acc.id}
-                    className="flex justify-between text-sm"
-                  >
-                    <span className="capitalize text-muted-foreground">
-                      {acc.platform}
-                    </span>
-                    <span className="font-medium">
-                      {formatFollowers(acc.followerCount)}
-                    </span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
         <Separator />
 
         {/* Offer / Message section */}
@@ -256,7 +221,7 @@ export default async function Page({ params }: Props) {
             <CardTitle>Interested in this opportunity?</CardTitle>
             <CardDescription>
               {listing.pricingType === "AUCTION"
-                ? "Place a bid or message the creator to discuss."
+                ? "Place a bid or message the brand to discuss."
                 : "Make an offer at the asking price or message to inquire."}
             </CardDescription>
           </CardHeader>
@@ -281,11 +246,11 @@ export default async function Page({ params }: Props) {
             <ContactDialog
               listingId={id}
               listingTitle={listing.title}
-              influencerUserId={influencerProfile.user?.id ?? ""}
+              brandUserId={brand.user?.id ?? ""}
             />
             <Button variant="outline" size="lg" asChild className="gap-2">
-              <Link href={`/influencer/${influencerProfile.handle}`}>
-                View Profile
+              <Link href={`/brand/${brand.handle}`}>
+                View Brand Profile
               </Link>
             </Button>
           </CardContent>

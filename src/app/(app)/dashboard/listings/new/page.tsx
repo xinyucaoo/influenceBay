@@ -17,6 +17,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Niche {
   id: string;
@@ -24,13 +31,21 @@ interface Niche {
   slug: string;
 }
 
+interface Campaign {
+  id: string;
+  title: string;
+  status: string;
+}
+
 export default function NewListingPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
   const [niches, setNiches] = useState<Niche[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [saving, setSaving] = useState(false);
 
+  const [campaignId, setCampaignId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [pricingType, setPricingType] = useState<"FIXED" | "AUCTION">("FIXED");
@@ -45,7 +60,7 @@ export default function NewListingPage() {
       router.push("/auth/signin");
     } else if (
       status === "authenticated" &&
-      session?.user?.role !== "INFLUENCER"
+      session?.user?.role !== "BRAND"
     ) {
       router.push("/dashboard");
     }
@@ -58,6 +73,13 @@ export default function NewListingPage() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    fetch("/api/campaigns?mine=true&limit=100")
+      .then((r) => r.json())
+      .then((data: { campaigns: Campaign[] }) => setCampaigns(data.campaigns ?? []))
+      .catch(() => {});
+  }, []);
+
   function toggleNiche(id: string) {
     setSelectedNicheIds((prev) =>
       prev.includes(id) ? prev.filter((n) => n !== id) : [...prev, id],
@@ -67,6 +89,10 @@ export default function NewListingPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!campaignId) {
+      toast.error("Please select a campaign.");
+      return;
+    }
     if (!title.trim()) {
       toast.error("Title is required.");
       return;
@@ -102,6 +128,7 @@ export default function NewListingPage() {
     setSaving(true);
     try {
       const body: Record<string, unknown> = {
+        campaignId,
         title: title.trim(),
         description: description.trim(),
         pricingType,
@@ -145,7 +172,7 @@ export default function NewListingPage() {
 
   if (
     status === "loading" ||
-    (status === "authenticated" && session?.user?.role !== "INFLUENCER")
+    (status === "authenticated" && session?.user?.role !== "BRAND")
   ) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -160,11 +187,31 @@ export default function NewListingPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Create Sponsorship Listing</CardTitle>
           <CardDescription>
-            List an upcoming content opportunity for brands to discover and make offers.
+            Add a sponsorship opportunity to one of your campaigns. Influencers can browse and make offers.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-2">
+              <Label htmlFor="campaign">Campaign</Label>
+              <Select
+                value={campaignId}
+                onValueChange={setCampaignId}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a campaign" />
+                </SelectTrigger>
+                <SelectContent>
+                  {campaigns.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -269,7 +316,7 @@ export default function NewListingPage() {
               <div>
                 <Label>Niches</Label>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Select content themes (e.g. Parenting, Family) to help brands find your listing.
+                  Select content themes to help influencers find your listing.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">

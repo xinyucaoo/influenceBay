@@ -44,8 +44,10 @@ const createCampaignSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
     const params = request.nextUrl.searchParams;
 
+    const mine = params.get("mine") === "true";
     const q = params.get("q")?.trim() || "";
     const niche = params.get("niche")?.trim() || "";
     const minBudget = params.get("minBudget")
@@ -61,7 +63,24 @@ export async function GET(request: NextRequest) {
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = { status: "OPEN" };
+    const where: any = mine && session?.user?.role === "BRAND"
+      ? {}
+      : { status: "OPEN" };
+
+    if (mine && session?.user?.role === "BRAND") {
+      const brandProfile = await prisma.brandProfile.findUnique({
+        where: { userId: session.user.id },
+      });
+      if (!brandProfile) {
+        return NextResponse.json({
+          campaigns: [],
+          total: 0,
+          page,
+          totalPages: 0,
+        });
+      }
+      where.brandProfileId = brandProfile.id;
+    }
 
     if (q) {
       where.OR = [

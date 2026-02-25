@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -52,6 +54,11 @@ type BrandRow = {
 };
 
 export default async function HomePage() {
+  const session = await auth();
+  if (session?.user?.role) {
+    redirect("/dashboard");
+  }
+
   const [
     influencerCount,
     brandCount,

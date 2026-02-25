@@ -41,7 +41,7 @@ export function OfferForm({
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const isBrand = session?.user?.role === "BRAND";
+  const isInfluencer = session?.user?.role === "INFLUENCER";
 
   const minAmount =
     pricingType === "AUCTION"
@@ -69,10 +69,10 @@ export function OfferForm({
     );
   }
 
-  if (!isBrand) {
+  if (!isInfluencer) {
     return (
       <p className="text-sm text-muted-foreground">
-        Only brands can make offers on sponsorship listings.
+        Only influencers can make offers on sponsorship listings.
       </p>
     );
   }
