@@ -7,14 +7,21 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  const hasSessionWithRole = session?.user?.role != null;
+  let session;
+  try {
+    session = await auth();
+  } catch (e) {
+    console.error("Auth error in layout:", e);
+    return <>{children}</>;
+  }
+
+  const role = session?.user?.role;
+  const hasSessionWithRole =
+    role === "INFLUENCER" || role === "BRAND";
 
   if (!hasSessionWithRole) {
     return <>{children}</>;
   }
-
-  const role = session.user.role as "INFLUENCER" | "BRAND";
 
   return (
     <SidebarProvider disableKeyboardShortcut>

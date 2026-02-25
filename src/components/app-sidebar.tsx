@@ -10,6 +10,7 @@ import {
   Users,
   Building2,
   MessageSquare,
+  FileText,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +33,8 @@ type NavItem = {
 const INFLUENCER_NAV: NavItem[] = [
   { href: "/dashboard/influencer", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/profile", label: "Profile", icon: User },
+  { href: "/dashboard/applications", label: "Applications", icon: FileText },
+  { href: "/dashboard/influencer-listings", label: "My Listings", icon: Tag },
   { href: "/dashboard/listings", label: "My Offers", icon: Tag },
   { href: "/campaigns", label: "Find Campaigns", icon: Megaphone },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
@@ -39,6 +42,7 @@ const INFLUENCER_NAV: NavItem[] = [
 
 const INFLUENCER_NAV_SECONDARY: NavItem[] = [
   { href: "/influencers", label: "Browse Influencers", icon: Users },
+  { href: "/influencer-listings", label: "Influencer Listings", icon: Tag },
   { href: "/brands", label: "Brands", icon: Building2 },
 ];
 
@@ -46,7 +50,8 @@ const BRAND_NAV: NavItem[] = [
   { href: "/dashboard/brand", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/profile", label: "Profile", icon: User },
   { href: "/dashboard/campaigns", label: "My Campaigns", icon: Megaphone },
-  { href: "/listings", label: "Listings", icon: Tag },
+  { href: "/dashboard/listings", label: "My Listings", icon: Tag },
+  { href: "/influencer-listings", label: "Find Opportunities", icon: Tag },
   { href: "/influencers", label: "Find Influencers", icon: Users },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
 ];
