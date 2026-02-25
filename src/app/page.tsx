@@ -375,11 +375,11 @@ export default async function HomePage() {
                 const brand = brandMap.get(campaign.brandProfileId);
                 const budget =
                   campaign.budgetMin && campaign.budgetMax
-                    ? `$${campaign.budgetMin.toLocaleString()} – $${campaign.budgetMax.toLocaleString()}`
+                    ? `$${campaign.budgetMin.toLocaleString("en-US")} – $${campaign.budgetMax.toLocaleString("en-US")}`
                     : campaign.budgetMin
-                      ? `From $${campaign.budgetMin.toLocaleString()}`
+                      ? `From $${campaign.budgetMin.toLocaleString("en-US")}`
                       : campaign.budgetMax
-                        ? `Up to $${campaign.budgetMax.toLocaleString()}`
+                        ? `Up to $${campaign.budgetMax.toLocaleString("en-US")}`
                         : null;
                 return (
                   <Link

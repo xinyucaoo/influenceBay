@@ -1,0 +1,16 @@
+---
+description: Start database with Homebrew, not Docker
+alwaysApply: true
+---
+
+# Database Startup
+
+When starting the database or dev environment for InfluenceBay:
+
+- **Use Homebrew PostgreSQL**, not Docker
+- Start: `brew services start postgresql@14`
+- Create DB (first time): `createdb influencebay`
+- Migrate: `npm run db:migrate`
+- Dev server: `npm run dev`
+
+`.env` should use Homebrew connection: `postgres://YOUR_USERNAME@localhost:5432/influencebay?sslmode=disable`
