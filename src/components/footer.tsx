@@ -6,11 +6,8 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xs">
-                iB
-              </div>
-              <span className="font-bold">InfluenceBay</span>
+            <Link href="/" className="font-display mb-3 inline-block tracking-wide">
+              Influen
             </Link>
             <p className="text-sm text-muted-foreground">
               The marketplace connecting influencers and brands for better
@@ -41,7 +38,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-6 border-t text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} InfluenceBay. All rights reserved.
+          &copy; {new Date().getFullYear()} Influen. All rights reserved.
         </div>
       </div>
     </footer>
