@@ -267,31 +267,44 @@ export default function MessagesPage() {
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border bg-card shadow-sm">
-        {/* ── Left panel: Conversation list ── */}
-        <div
-          className={`w-full flex-col border-r md:flex md:w-80 lg:w-96 ${
-            selectedId ? "hidden" : "flex"
-          }`}
-        >
-          <div className="border-b px-4 py-3">
-            <p className="text-sm font-medium text-muted-foreground">
-              {contacts.length} conversation{contacts.length !== 1 ? "s" : ""}
-            </p>
+        {/* When no contacts: show both empty states in one horizontal row */}
+        {contacts.length === 0 ? (
+          <div className="flex flex-1 items-stretch">
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 border-r px-6 py-16 text-center">
+              <MessageSquare className="h-12 w-12 shrink-0 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">
+                No conversations yet
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                Send a contact request to start a conversation
+              </p>
+            </div>
+            <div className="hidden flex-1 flex-col items-center justify-center gap-3 px-6 py-16 text-center md:flex">
+              <MessageSquare className="h-12 w-12 shrink-0 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">
+                Select a conversation
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                Choose a conversation from the list to start messaging
+              </p>
+            </div>
           </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {contacts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-                <MessageSquare className="h-12 w-12 text-muted-foreground/40" />
+        ) : (
+          <>
+            {/* ── Left panel: Conversation list ── */}
+            <div
+              className={`flex w-full flex-col border-r md:w-80 lg:w-96 ${
+                selectedId ? "hidden" : "flex"
+              }`}
+            >
+              <div className="shrink-0 border-b px-4 py-3">
                 <p className="text-sm font-medium text-muted-foreground">
-                  No conversations yet
-                </p>
-                <p className="text-xs text-muted-foreground/70">
-                  Send a contact request to start a conversation
+                  {contacts.length} conversation{contacts.length !== 1 ? "s" : ""}
                 </p>
               </div>
-            ) : (
-              contacts.map((contact) => {
+
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                {contacts.map((contact) => {
                 const cfg = statusConfig[contact.status];
                 const StatusIcon = cfg.icon;
                 const isSelected = contact.id === selectedId;
@@ -338,26 +351,25 @@ export default function MessagesPage() {
                     </div>
                   </button>
                 );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* ── Right panel: Chat view ── */}
-        <div
-          className={`flex-1 flex-col ${selectedId ? "flex" : "hidden md:flex"}`}
-        >
-          {!selectedContact ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-              <MessageSquare className="h-16 w-16 text-muted-foreground/30" />
-              <p className="text-lg font-medium text-muted-foreground">
-                Select a conversation
-              </p>
-              <p className="text-sm text-muted-foreground/70">
-                Choose a conversation from the list to start messaging
-              </p>
+              })}
+              </div>
             </div>
-          ) : (
+
+            {/* ── Right panel: Chat view ── */}
+            <div
+              className={`flex min-h-0 flex-1 flex-col ${selectedId ? "flex" : "hidden md:flex"}`}
+            >
+              {!selectedContact ? (
+                <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+                  <MessageSquare className="h-12 w-12 shrink-0 text-muted-foreground/40" />
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Select a conversation
+                  </p>
+                  <p className="text-xs text-muted-foreground/70">
+                    Choose a conversation from the list to start messaging
+                  </p>
+                </div>
+              ) : (
             <>
               {/* Chat header */}
               <div className="flex items-center gap-3 border-b px-4 py-3">
@@ -522,9 +534,11 @@ export default function MessagesPage() {
                   </div>
                 )}
               </div>
-            </>
-          )}
-        </div>
+              </>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

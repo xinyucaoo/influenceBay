@@ -21,7 +21,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-  SidebarRail,
 } from "@/components/ui/sidebar";
 
 type NavItem = {
@@ -85,8 +84,11 @@ export function AppSidebar({ role }: { role: "INFLUENCER" | "BRAND" }) {
   };
 
   return (
-    <Sidebar collapsible="icon" side="left">
-      <SidebarRail />
+    <Sidebar
+      collapsible="none"
+      side="left"
+      className="hidden md:flex min-h-svh shrink-0 flex-col border-r"
+    >
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Main</SidebarGroupLabel>

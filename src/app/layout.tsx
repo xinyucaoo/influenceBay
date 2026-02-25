@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import AuthSessionProvider from "@/lib/session-provider";
 import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
+import { ConditionalFooter } from "@/components/conditional-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -44,7 +44,7 @@ export default function RootLayout({
             <div className="flex min-h-screen flex-col">
               <Navbar />
               <main className="flex-1">{children}</main>
-              <Footer />
+              <ConditionalFooter />
             </div>
             <Toaster />
           </TooltipProvider>
