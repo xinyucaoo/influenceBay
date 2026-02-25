@@ -125,18 +125,18 @@ export default async function InfluencerDashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 [&>div]:min-w-0">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="flex min-w-0 items-center gap-3 rounded-lg border bg-card px-3 py-2.5 shadow-sm"
+            className="flex min-w-0 items-center gap-3 overflow-hidden rounded-lg border bg-card px-3 py-2.5 shadow-sm"
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted [&_svg]:block">
               <stat.icon className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="flex min-w-0 flex-1 items-baseline gap-2">
+            <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 overflow-hidden">
               <span className="text-sm text-muted-foreground">{stat.label}</span>
-              <span className="text-base font-semibold tabular-nums">{stat.value}</span>
+              <span className="text-base font-semibold tabular-nums leading-tight">{stat.value}</span>
             </div>
           </div>
         ))}
